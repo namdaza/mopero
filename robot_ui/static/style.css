@@ -1,0 +1,605 @@
+:root {
+    /* Đổi sang nền trắng */
+    --bg-color: #ffffff;
+    --text-color: #333333;
+    --main-blue: #00aaff;
+    --eye-border: #000000; /* Viền đen cho mắt để nổi trên nền trắng */
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    overflow: hidden;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* --- Cấu trúc màn hình --- */
+.screen {
+    display: none;
+    width: 100%;
+    height: 100%;
+    flex-direction: column;
+    align-items: center;
+    transition: opacity 0.5s ease;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.screen.active {
+    display: flex;
+}
+
+#home-screen {
+    justify-content: center;
+}
+
+/* --- TẠO HÌNH ROBOT (Cập nhật cho nền trắng) --- */
+.robot-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Mắt */
+.eyes-container {
+    display: flex;
+    gap: 40px;
+    /* margin-top removed */
+}
+
+.eye {
+    width: 150px;
+    height: 150px;
+    background-color: #fff; /* Lòng trắng mắt */
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 12px solid var(--eye-border); /* Viền đen */
+    /* Hiệu ứng phát sáng nhẹ màu xanh */
+    box-shadow: 0 0 15px rgba(0, 170, 255, 0.4); 
+    overflow: hidden;
+}
+
+/* Con ngươi màu xanh */
+.pupil {
+    width: 80px;
+    height: 80px;
+    background-color: var(--text-color); /* Lòng đen bên trong */
+    border: 25px solid var(--main-blue); /* Vòng tròn màu xanh */
+    border-radius: 50%;
+}
+
+/* Miệng SVG (Đã đặt xuống dưới) */
+.mouth-svg {
+    width: 200px;
+    height: 80px;
+    margin-top: 22px; /* Cách mắt ra một chút */
+    z-index: 2;
+}
+/* Đường path mặc định đã là cười (trong HTML) */
+
+
+/* --- HOẠT HỌA (ANIMATIONS) --- */
+/* Chớp mắt */
+@keyframes blink {
+    0%, 90%, 100% { transform: scaleY(1); }
+    95% { transform: scaleY(0.1); }
+}
+.main-robot .eye {
+    /* Cả 2 mắt dùng chung 1 animation, không có delay */
+    animation: blink 5s infinite ease-in-out;
+}
+
+
+/* --- CSS CHO TRANG CHỦ --- */
+.nav-btn {
+    margin-top: 80px;
+    padding: 15px 30px;
+    font-size: 1.3rem;
+    background-color: var(--main-blue);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    box-shadow: 0 5px 15px rgba(0, 170, 255, 0.3);
+}
+
+.nav-btn .icon { font-size: 1.6rem; }
+
+.nav-btn:hover {
+    background-color: #008ecc;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 170, 255, 0.4);
+}
+
+/* Hiệu ứng nút đập nhẹ */
+@keyframes pulse-blue {
+    0% { box-shadow: 0 0 0 0 rgba(0, 170, 255, 0.7); }
+    70% { box-shadow: 0 0 0 15px rgba(0, 170, 255, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(0, 170, 255, 0); }
+}
+.pulse-btn {
+    animation: pulse-blue 2s infinite;
+}
+
+
+/* --- CSS CHO MÀN HÌNH VOICE --- */
+.screen-header {
+    width: 100%;
+    max-width: 600px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+.back-button {
+    background: none;
+    border: none;
+    color: var(--text-color);
+    font-size: 1.3rem;
+    cursor: pointer;
+    padding: 10px 0;
+    font-weight: 600;
+}
+
+.assistant-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: bold;
+    font-size: 1.3rem;
+}
+
+/* --- ROBOT NHỎ (Phiên bản Cute/Kawaii) --- */
+
+/* Container chỉnh lại vị trí */
+.small-robot {
+    transform: scale(0.9); /* Thu nhỏ xíu cho vừa vặn */
+}
+
+.small-robot .eyes-container {
+    gap: 8px; /* Hai mắt gần nhau hơn nhìn sẽ hiền hơn */
+    margin-top: 5px;
+}
+
+/* Form mắt mới: Bầu dục, màu tối */
+.small-robot .eye {
+    width: 28px;
+    height: 36px; /* Mắt dáng dài (bầu dục) */
+    background-color: #222; /* Màu mắt đen láy (hoặc dùng #00aaff nếu thích xanh) */
+    border-radius: 50%; /* Bo tròn */
+    border: none; /* BỎ VIỀN ĐEN DÀY đi */
+    box-shadow: none; /* Bỏ bóng đổ cũ */
+    position: relative;
+    overflow: hidden;
+}
+
+/* Biến con ngươi (pupil) thành "đốm sáng" long lanh */
+.small-robot .pupil {
+    width: 10px;
+    height: 10px;
+    background-color: white; /* Đốm sáng màu trắng */
+    border: none; /* Bỏ viền xanh cũ */
+    border-radius: 50%;
+    position: absolute;
+    top: 6px;    /* Lệch lên trên */
+    right: 6px;  /* Lệch sang phải */
+    box-shadow: 0 0 4px rgba(255, 255, 255, 0.8); /* Phát sáng nhẹ */
+}
+
+/* Miệng nhỏ xinh */
+.small-robot .mouth-svg {
+    width: 30px; /* Thu hẹp chiều ngang miệng */
+    height: 15px;
+    margin-top: 2px;
+}
+
+/* Vẽ lại nét miệng cho mảnh và cong nhẹ */
+.small-robot .mouth-svg path {
+    stroke: #222; /* Màu miệng đen cho rõ trên nền trắng */
+    stroke-width: 3; /* Nét mảnh thôi, đừng dày quá */
+    stroke-linecap: round;
+    /* Dùng d=path khác để chỉnh độ cong miệng cho khớp size nhỏ */
+    d: path("M 2 2 Q 15 18 28 2"); 
+}
+
+/* Hiệu ứng khi nói (nhún nhảy nhẹ thay vì phóng to) */
+@keyframes talkingBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+}
+.small-robot.talking {
+    animation: talkingBounce 0.5s infinite ease-in-out;
+}
+/* --- GIAO DIỆN VISUALIZER GIỌNG NÓI --- */
+.voice-interface-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-grow: 1;
+}
+
+#voice-status {
+    font-size: 1.5rem;
+    color: var(--text-color);
+    margin-bottom: 40px;
+    font-weight: 400;
+}
+
+/* Khu vực hiệu ứng sóng */
+.voice-visualizer {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Nút Micro tròn ở giữa */
+.mic-button {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: none;
+    background-color: var(--main-blue);
+    color: white;
+    cursor: pointer;
+    z-index: 10;
+    display: flex; justify-content: center; align-items: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0, 170, 255, 0.3);
+}
+.mic-button:hover { transform: scale(1.05); background-color: #009bd6;}
+.material-icons-round.md-48 { font-size: 36px; }
+
+
+/* Các vòng sóng (ẩn mặc định) */
+.wave {
+    position: absolute;
+    border-radius: 50%;
+    border: 3px solid var(--main-blue);
+    opacity: 0;
+    width: 80px; height: 80px; /* Bằng nút micro */
+}
+
+/* Animation khi đang nghe */
+.voice-interface-container.listening #voice-status {
+    color: var(--main-blue);
+    font-weight: 600;
+}
+
+.voice-interface-container.listening .mic-button {
+    background-color: #ff3333; /* Đổi màu đỏ khi đang thu âm */
+    box-shadow: 0 5px 15px rgba(255, 51, 51, 0.4);
+}
+
+/* Hiệu ứng sóng lan ra khi có class .listening */
+.voice-interface-container.listening .wave {
+    animation: wave-spread 2s infinite ease-out;
+}
+.voice-interface-container.listening .w1 { animation-delay: 0s; }
+.voice-interface-container.listening .w2 { animation-delay: 0.5s; }
+.voice-interface-container.listening .w3 { animation-delay: 1s; }
+
+@keyframes wave-spread {
+    0% { transform: scale(1); opacity: 0.8; }
+    100% { transform: scale(3); opacity: 0; }
+}
+
+#transcript-text {
+    margin-top: 30px;
+    font-style: italic;
+    color: #666;
+    max-width: 80%;
+    text-align: center;
+    min-height: 1.2em;
+}
+
+/* --- NÚT CHỨC NĂNG MỚI --- */
+.dashboard-controls {
+    margin-top: 30px;
+    display: flex;
+    gap: 20px;
+}
+
+.control-btn {
+    padding: 12px 20px;
+    background-color: white;
+    border: 2px solid var(--main-blue);
+    font-size: 1.3rem;
+    color: var(--main-blue);
+    border-radius: 15px;
+    cursor: pointer;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.control-btn:hover {
+    background-color: var(--main-blue);
+    color: white;
+}
+
+/* --- MODAL (CỬA SỔ BẬT LÊN) --- */
+.modal {
+    display: none; /* Ẩn mặc định */
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.7); /* Nền tối mờ */
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal.show {
+    display: flex; /* Hiện khi có class show */
+}
+
+.modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    width: 300px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    color: #333;
+}
+
+.modal-content h3 { margin-top: 0; color: var(--main-blue); }
+.modal-content input {
+    width: 80%;
+    padding: 10px;
+    margin: 15px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+/* Nút trong modal pass */
+.modal-actions { display: flex; justify-content: space-around; gap: 10px; }
+.btn-gray { background: #ccc; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; }
+.btn-blue { background: var(--main-blue); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; }
+
+/* Nút TRÒN X/O */
+.med-actions {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin: 20px 0;
+}
+
+.circle-btn {
+    width: 70px; height: 70px;
+    border-radius: 50%;
+    border: none;
+    color: white;
+    font-size: 2rem;
+    cursor: pointer;
+    display: flex; justify-content: center; align-items: center;
+    transition: transform 0.2s;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+.circle-btn:active { transform: scale(0.9); }
+
+.circle-btn.red { background-color: #ff4444; }
+.circle-btn.green { background-color: #00C851; }
+
+.btn-text {
+    background: none; border: none;
+    color: #666; text-decoration: underline; cursor: pointer;
+}
+/* ===== UI refresh (home screen only, no HTML/JS changes) ===== */
+body {
+    background: radial-gradient(circle at top, #f6fcff 0%, #eef6fb 45%, #eaf3f9 100%);
+    min-height: 100vh;
+}
+
+#home-screen {
+    justify-content: center;
+    position: relative;
+    padding-top: 0;
+}
+
+.main-robot {
+    width: min(96vw, 980px);
+    position: absolute;
+    top: 46%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.main-robot .eyes-container {
+    gap: clamp(44px, 6.5vw, 88px);
+}
+
+.main-robot .eye {
+    width: clamp(190px, 22vw, 260px);
+    height: clamp(190px, 22vw, 260px);
+    border-width: 13px;
+    box-shadow: 0 0 28px rgba(0, 170, 255, 0.28);
+    position: relative;
+}
+
+.main-robot .eye::before {
+    content: "";
+    position: absolute;
+    width: 35%;
+    height: 35%;
+    top: 12%;
+    left: 16%;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.8);
+}
+
+.main-robot .pupil {
+    width: clamp(100px, 11vw, 128px);
+    height: clamp(100px, 11vw, 128px);
+    border-width: clamp(24px, 3vw, 34px);
+    background: radial-gradient(circle at 35% 30%, #4a4a4a 0%, #2f2f2f 75%);
+}
+
+.main-robot .mouth-svg {
+    width: clamp(280px, 34vw, 400px);
+    height: clamp(100px, 12vw, 145px);
+    margin-top: 30px;
+}
+
+.main-robot::before,
+.main-robot::after {
+    content: "";
+    position: absolute;
+    width: clamp(60px, 7vw, 88px);
+    height: clamp(34px, 4vw, 48px);
+    border-radius: 50%;
+    background: radial-gradient(circle at center, rgba(255, 153, 175, 0.55) 0%, rgba(255, 153, 175, 0.1) 72%, rgba(255, 153, 175, 0) 100%);
+    top: clamp(260px, 28vw, 340px);
+    z-index: 1;
+    filter: blur(0.5px);
+}
+
+.main-robot::before {
+    left: clamp(110px, 16vw, 210px);
+}
+
+.main-robot::after {
+    right: clamp(110px, 16vw, 210px);
+}
+
+.nav-btn {
+    margin-top: 0;
+}
+
+#start-voice-btn {
+    position: fixed;
+    right: 30px;
+    bottom: 192px;
+    z-index: 40;
+    min-width: 320px;
+    justify-content: center;
+}
+
+#home-screen .dashboard-controls {
+    margin-top: 0;
+    position: fixed;
+    right: 30px;
+    bottom: 30px;
+    z-index: 40;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    width: min(320px, calc(100vw - 32px));
+}
+
+#home-screen .control-btn {
+    justify-content: center;
+    padding: 14px 18px;
+    border-radius: 16px;
+    width: 100%;
+}
+
+#home-screen #start-voice-btn,
+#home-screen .control-btn {
+    min-height: 62px;
+}
+
+#voice-screen {
+    width: 100vw;
+    height: 100vh;
+    padding: 20px 28px 24px;
+    justify-content: space-between;
+}
+
+#voice-screen .screen-header {
+    width: 100%;
+    max-width: none;
+    margin-bottom: 0;
+    padding: 2px 0;
+}
+
+#voice-screen .assistant-info {
+    font-size: 2rem;
+    font-weight: 700;
+    gap: 14px;
+}
+
+#voice-screen .voice-interface-container {
+    width: 100%;
+    flex-grow: 1;
+    justify-content: center;
+    gap: 26px;
+    padding: 2vh 0 8vh;
+}
+
+#voice-screen #voice-status {
+    margin-bottom: 0;
+    font-size: clamp(1.8rem, 3.6vw, 3rem);
+    text-align: center;
+}
+
+#voice-screen #transcript-text {
+    margin-top: 0;
+    min-height: 2.4em;
+    font-size: 1.2rem;
+    max-width: min(860px, 88vw);
+}
+
+@media (max-width: 768px) {
+    #home-screen {
+        padding-top: 0;
+    }
+
+    #start-voice-btn {
+        right: 16px;
+        left: 16px;
+        bottom: 168px;
+        min-width: unset;
+    }
+
+    #home-screen .dashboard-controls {
+        right: 16px;
+        left: 16px;
+        width: auto;
+    }
+
+    .main-robot::before,
+    .main-robot::after {
+        top: clamp(210px, 34vw, 280px);
+    }
+
+    #voice-screen {
+        padding: 14px 16px 20px;
+    }
+
+    #voice-screen .assistant-info {
+        font-size: 1.35rem;
+        gap: 10px;
+    }
+
+    #voice-screen .voice-interface-container {
+        gap: 18px;
+        padding: 0 0 4vh;
+    }
+
+    #voice-screen #voice-status {
+        font-size: clamp(1.5rem, 6.4vw, 2.1rem);
+    }
+}

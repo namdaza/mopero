@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+.pytest_cache/
+
+# Environment and secrets
+.env
+*.env
+!.env.example
+
+# ROS 2 / colcon generated files
+ros2_ws/build/
+ros2_ws/install/
+ros2_ws/log/
+
+# Local editor settings
+.vscode/
+.idea/
+.codex
+.local_git_backups/
+
+# Generated logs and temporary files
+*.log
+*.tmp
+*.bak
+
+# Large generated model artifacts
+*.engine
+*.onnx
+*.pt
+*.pth
+*.bin
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Accidental placeholder files
+ros2_ws/robot_ui
