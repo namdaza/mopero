@@ -134,6 +134,7 @@ Phần cứng đang được cấu hình trong dự án:
 - RPLIDAR.
 - USB camera/webcam có microphone.
 - Khung robot differential drive.
+- Cùng một số nguồn điện như pin 12V-35Ah, các mạch module chia và giảm áp.
 
 Thông số robot quan trọng:
 
