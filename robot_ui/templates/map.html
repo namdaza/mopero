@@ -1,0 +1,723 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Robot Map UI</title>
+  <style>
+    :root {
+      --bg: #eef2f6;
+      --panel: #ffffff;
+      --text: #17202a;
+      --muted: #667085;
+      --line: #d6dde7;
+      --soft: #f7f9fc;
+      --accent: #246bfe;
+      --accent-dark: #1e4fd1;
+      --ok: #16803c;
+      --bad: #b42318;
+      --goal: #f97316;
+      --robot: #0f8b8d;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    body {
+      display: grid;
+      grid-template-rows: 54px 1fr;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 0 16px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--line);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 17px;
+      white-space: nowrap;
+    }
+
+    .status {
+      min-width: 92px;
+      padding: 7px 10px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--soft);
+      font-size: 13px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .status.ok {
+      color: var(--ok);
+      border-color: #9ad4ad;
+      background: #f0fdf4;
+    }
+
+    .status.bad {
+      color: var(--bad);
+      border-color: #f2aaa3;
+      background: #fff4f2;
+    }
+
+    input {
+      width: min(30vw, 260px);
+      height: 34px;
+      padding: 0 10px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      font: inherit;
+      font-size: 13px;
+    }
+
+    .backend-controls {
+      display: none;
+    }
+
+    button {
+      height: 34px;
+      padding: 0 11px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--panel);
+      color: var(--text);
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button.primary {
+      border-color: var(--accent-dark);
+      background: var(--accent);
+      color: #fff;
+    }
+
+    button.active {
+      border-color: #c05621;
+      background: #fff7ed;
+      color: #c2410c;
+    }
+
+    main {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 220px;
+      gap: 12px;
+      padding: 12px;
+    }
+
+    .map-panel {
+      min-width: 0;
+      min-height: 0;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      border: 1px solid var(--line);
+      background: var(--panel);
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px;
+      border-bottom: 1px solid var(--line);
+      background: var(--soft);
+      overflow-x: auto;
+    }
+
+    .canvas-wrap {
+      min-height: 0;
+      position: relative;
+      background:
+        linear-gradient(#e9eef5 1px, transparent 1px),
+        linear-gradient(90deg, #e9eef5 1px, transparent 1px),
+        #f8fafc;
+      background-size: 28px 28px;
+      overflow: hidden;
+      cursor: grab;
+    }
+
+    .canvas-wrap.goal-mode {
+      cursor: crosshair;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .hint {
+      position: absolute;
+      left: 14px;
+      bottom: 14px;
+      padding: 7px 10px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.92);
+      color: var(--muted);
+      font-size: 13px;
+      pointer-events: none;
+    }
+
+    aside {
+      min-width: 0;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      padding: 12px;
+      display: grid;
+      align-content: start;
+      gap: 12px;
+    }
+
+    .metric {
+      display: grid;
+      gap: 3px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #edf0f5;
+    }
+
+    .metric.backend {
+      display: none;
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .metric strong {
+      font-size: 14px;
+      overflow-wrap: anywhere;
+    }
+
+    .metric:last-child {
+      border-bottom: 0;
+    }
+
+    @media (max-width: 900px) {
+      body {
+        overflow: auto;
+      }
+
+      main {
+        grid-template-columns: 1fr;
+        grid-template-rows: minmax(480px, calc(100vh - 92px)) auto;
+      }
+
+      aside {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Robot Map</h1>
+    <div id="status" class="status bad">Disconnected</div>
+    <button id="homeBtn">Trang chính</button>
+    <div class="backend-controls" aria-hidden="true">
+      <input id="wsUrl" aria-label="WebSocket URL" value="">
+      <button id="connectBtn" class="primary">Connect</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="map-panel">
+      <div class="toolbar">
+        <button id="fitBtn">Fit</button>
+        <button id="zoomInBtn">Zoom +</button>
+        <button id="zoomOutBtn">Zoom -</button>
+        <button id="rotLeftBtn">Rotate -90</button>
+        <button id="rotRightBtn">Rotate +90</button>
+        <button id="initialPoseBtn">Initial Pose</button>
+        <button id="goalBtn">Nav Goal</button>
+        <button id="clearGoalBtn">Clear Goal</button>
+      </div>
+      <div id="canvasWrap" class="canvas-wrap">
+        <canvas id="mapCanvas"></canvas>
+        <div id="hint" class="hint">Kéo để pan, cuộn để zoom. Bấm Nav Goal rồi click-kéo trên map để gửi điểm đến.</div>
+      </div>
+    </section>
+
+    <aside>
+      <div class="metric backend">
+        <span>Topic</span>
+        <strong>/map</strong>
+      </div>
+      <div class="metric backend">
+        <span>Goal publish</span>
+        <strong>/goal_pose</strong>
+      </div>
+      <div class="metric backend">
+        <span>Initial pose publish</span>
+        <strong>/initialpose</strong>
+      </div>
+      <div class="metric backend">
+        <span>Map size</span>
+        <strong id="mapSize">Waiting</strong>
+      </div>
+      <div class="metric backend">
+        <span>Resolution</span>
+        <strong id="resolution">Waiting</strong>
+      </div>
+      <div class="metric backend">
+        <span>Origin</span>
+        <strong id="origin">Waiting</strong>
+      </div>
+      <div class="metric">
+        <span>Robot pose</span>
+        <strong id="robotPose">Waiting</strong>
+      </div>
+      <div class="metric">
+        <span>Last goal</span>
+        <strong id="lastGoal">None</strong>
+      </div>
+      <div class="metric">
+        <span>Last update</span>
+        <strong id="lastUpdate">Waiting</strong>
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    const canvas = document.getElementById('mapCanvas');
+    const wrap = document.getElementById('canvasWrap');
+    const ctx = canvas.getContext('2d');
+    const statusEl = document.getElementById('status');
+    const homeBtn = document.getElementById('homeBtn');
+    const wsUrlEl = document.getElementById('wsUrl');
+    const connectBtn = document.getElementById('connectBtn');
+    const fitBtn = document.getElementById('fitBtn');
+    const zoomInBtn = document.getElementById('zoomInBtn');
+    const zoomOutBtn = document.getElementById('zoomOutBtn');
+    const rotLeftBtn = document.getElementById('rotLeftBtn');
+    const rotRightBtn = document.getElementById('rotRightBtn');
+    const initialPoseBtn = document.getElementById('initialPoseBtn');
+    const goalBtn = document.getElementById('goalBtn');
+    const clearGoalBtn = document.getElementById('clearGoalBtn');
+    const mapSizeEl = document.getElementById('mapSize');
+    const resolutionEl = document.getElementById('resolution');
+    const originEl = document.getElementById('origin');
+    const robotPoseEl = document.getElementById('robotPose');
+    const lastGoalEl = document.getElementById('lastGoal');
+    const lastUpdateEl = document.getElementById('lastUpdate');
+
+    let socket = null;
+    let map = null;
+    let mapImage = null;
+    let robotPose = null;
+    let goalPose = null;
+    let pendingPose = null;
+    let mode = 'pan';
+    let dragging = false;
+    let dragStart = null;
+    let view = { scale: 1, offsetX: 0, offsetY: 0, rotation: Math.PI / 2 };
+
+    wsUrlEl.value = `ws://${window.location.hostname || 'localhost'}:9090`;
+
+    function setStatus(text, state) {
+      statusEl.textContent = text;
+      statusEl.className = `status ${state || ''}`.trim();
+    }
+
+    function sendRosbridge(message) {
+      if (!socket || socket.readyState !== WebSocket.OPEN) return;
+      socket.send(JSON.stringify(message));
+    }
+
+    function connect() {
+      if (socket) socket.close();
+      setStatus('Connecting', '');
+      socket = new WebSocket(wsUrlEl.value);
+
+      socket.addEventListener('open', () => {
+        setStatus('Connected', 'ok');
+        sendRosbridge({ op: 'subscribe', topic: '/map', type: 'nav_msgs/OccupancyGrid', throttle_rate: 500 });
+        sendRosbridge({ op: 'subscribe', topic: '/amcl_pose', type: 'geometry_msgs/PoseWithCovarianceStamped', throttle_rate: 200 });
+        sendRosbridge({ op: 'advertise', topic: '/goal_pose', type: 'geometry_msgs/PoseStamped' });
+        sendRosbridge({ op: 'advertise', topic: '/initialpose', type: 'geometry_msgs/PoseWithCovarianceStamped' });
+      });
+
+      socket.addEventListener('message', (event) => {
+        const payload = JSON.parse(event.data);
+        if (payload.op !== 'publish') return;
+        if (payload.topic === '/map') {
+          setMap(payload.msg);
+        }
+        if (payload.topic === '/amcl_pose') {
+          robotPose = payload.msg.pose.pose;
+          robotPoseEl.textContent = formatPose(robotPose);
+          render();
+        }
+      });
+
+      socket.addEventListener('close', () => setStatus('Disconnected', 'bad'));
+      socket.addEventListener('error', () => setStatus('Error', 'bad'));
+    }
+
+    function setMap(msg) {
+      const firstMap = !map;
+      map = msg;
+      mapImage = buildMapImage(msg);
+      if (firstMap) fitMap();
+      mapSizeEl.textContent = `${msg.info.width} x ${msg.info.height}`;
+      resolutionEl.textContent = `${msg.info.resolution.toFixed(3)} m/cell`;
+      originEl.textContent = `${msg.info.origin.position.x.toFixed(2)}, ${msg.info.origin.position.y.toFixed(2)}`;
+      lastUpdateEl.textContent = new Date().toLocaleTimeString();
+      render();
+    }
+
+    function buildMapImage(msg) {
+      const width = msg.info.width;
+      const height = msg.info.height;
+      const offscreen = document.createElement('canvas');
+      offscreen.width = width;
+      offscreen.height = height;
+      const offCtx = offscreen.getContext('2d');
+      const image = offCtx.createImageData(width, height);
+
+      for (let y = 0; y < height; y += 1) {
+        for (let x = 0; x < width; x += 1) {
+          const rosIndex = x + (height - 1 - y) * width;
+          const pixelIndex = (x + y * width) * 4;
+          const value = msg.data[rosIndex];
+          let r = 190;
+          let g = 198;
+          let b = 208;
+
+          if (value === 0) {
+            r = 248; g = 250; b = 252;
+          } else if (value >= 65) {
+            r = 23; g = 29; b = 38;
+          }
+
+          image.data[pixelIndex] = r;
+          image.data[pixelIndex + 1] = g;
+          image.data[pixelIndex + 2] = b;
+          image.data[pixelIndex + 3] = 255;
+        }
+      }
+
+      offCtx.putImageData(image, 0, 0);
+      return offscreen;
+    }
+
+    function resizeCanvas() {
+      const rect = wrap.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = Math.max(1, Math.floor(rect.width * dpr));
+      canvas.height = Math.max(1, Math.floor(rect.height * dpr));
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      return rect;
+    }
+
+    function rotatedBounds(w, h, rotation) {
+      const cos = Math.abs(Math.cos(rotation));
+      const sin = Math.abs(Math.sin(rotation));
+      return { width: w * cos + h * sin, height: w * sin + h * cos };
+    }
+
+    function fitMap() {
+      if (!map) return;
+      const rect = wrap.getBoundingClientRect();
+      const bounds = rotatedBounds(map.info.width, map.info.height, view.rotation);
+      view.scale = Math.min(rect.width / bounds.width, rect.height / bounds.height) * 0.88;
+      view.offsetX = rect.width / 2;
+      view.offsetY = rect.height / 2;
+      render();
+    }
+
+    function render() {
+      const rect = resizeCanvas();
+      ctx.clearRect(0, 0, rect.width, rect.height);
+      if (!map || !mapImage) return;
+
+      ctx.save();
+      ctx.translate(view.offsetX, view.offsetY);
+      ctx.rotate(view.rotation);
+      ctx.scale(view.scale, view.scale);
+      ctx.drawImage(mapImage, -map.info.width / 2, -map.info.height / 2);
+
+      if (robotPose) drawPose(robotPose, varColor('--robot'), 8, 'robot');
+      if (goalPose) drawPose(goalPose, varColor('--goal'), 9, 'goal');
+      if (pendingPose) drawPendingPose();
+
+      ctx.restore();
+    }
+
+    function varColor(name) {
+      return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    }
+
+    function worldToPixel(position) {
+      const x = (position.x - map.info.origin.position.x) / map.info.resolution;
+      const y = map.info.height - ((position.y - map.info.origin.position.y) / map.info.resolution);
+      return { x: x - map.info.width / 2, y: y - map.info.height / 2 };
+    }
+
+    function pixelToWorld(pixel) {
+      return {
+        x: map.info.origin.position.x + (pixel.x + map.info.width / 2) * map.info.resolution,
+        y: map.info.origin.position.y + (map.info.height - (pixel.y + map.info.height / 2)) * map.info.resolution
+      };
+    }
+
+    function screenToMapPixel(screenX, screenY) {
+      const rect = wrap.getBoundingClientRect();
+      const x = screenX - rect.left - view.offsetX;
+      const y = screenY - rect.top - view.offsetY;
+      const cos = Math.cos(-view.rotation);
+      const sin = Math.sin(-view.rotation);
+      return {
+        x: (x * cos - y * sin) / view.scale,
+        y: (x * sin + y * cos) / view.scale
+      };
+    }
+
+    function quaternionYaw(q) {
+      return Math.atan2(
+        2 * (q.w * q.z + q.x * q.y),
+        1 - 2 * (q.y * q.y + q.z * q.z)
+      );
+    }
+
+    function yawToQuaternion(yaw) {
+      return { x: 0, y: 0, z: Math.sin(yaw / 2), w: Math.cos(yaw / 2) };
+    }
+
+    function drawPose(pose, color, size, kind) {
+      const point = worldToPixel(pose.position);
+      const yaw = quaternionYaw(pose.orientation);
+      const heading = -yaw;
+      ctx.save();
+      ctx.translate(point.x, point.y);
+      ctx.rotate(heading);
+      ctx.fillStyle = color;
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2 / view.scale;
+      ctx.beginPath();
+      ctx.moveTo(size / view.scale, 0);
+      ctx.lineTo(-size / view.scale, -size * 0.7 / view.scale);
+      ctx.lineTo(-size * 0.45 / view.scale, 0);
+      ctx.lineTo(-size / view.scale, size * 0.7 / view.scale);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      if (kind === 'goal') {
+        ctx.beginPath();
+        ctx.arc(0, 0, size * 1.35 / view.scale, 0, Math.PI * 2);
+        ctx.strokeStyle = color;
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function drawPendingPose() {
+      const start = worldToPixel(pendingPose.position);
+      const end = worldToPixel({
+        x: pendingPose.position.x + Math.cos(pendingPose.yaw) * 0.5,
+        y: pendingPose.position.y + Math.sin(pendingPose.yaw) * 0.5
+      });
+      ctx.save();
+      ctx.strokeStyle = mode === 'initial' ? varColor('--robot') : varColor('--goal');
+      ctx.fillStyle = mode === 'initial' ? varColor('--robot') : varColor('--goal');
+      ctx.lineWidth = 3 / view.scale;
+      ctx.beginPath();
+      ctx.arc(start.x, start.y, 7 / view.scale, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(start.x, start.y);
+      ctx.lineTo(end.x, end.y);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function publishGoal(position, yaw) {
+      const pose = {
+        position: { x: position.x, y: position.y, z: 0 },
+        orientation: yawToQuaternion(yaw)
+      };
+      goalPose = pose;
+      lastGoalEl.textContent = formatPose(pose);
+      sendRosbridge({
+        op: 'publish',
+        topic: '/goal_pose',
+        msg: {
+          header: {
+            frame_id: 'map',
+            stamp: zeroStamp()
+          },
+          pose
+        }
+      });
+      render();
+    }
+
+    function publishInitialPose(position, yaw) {
+      const pose = {
+        position: { x: position.x, y: position.y, z: 0 },
+        orientation: yawToQuaternion(yaw)
+      };
+      robotPose = pose;
+      robotPoseEl.textContent = formatPose(pose);
+      sendRosbridge({
+        op: 'publish',
+        topic: '/initialpose',
+        msg: {
+          header: {
+            frame_id: 'map',
+            stamp: zeroStamp()
+          },
+          pose: {
+            pose,
+            covariance: [
+              0.25, 0, 0, 0, 0, 0,
+              0, 0.25, 0, 0, 0, 0,
+              0, 0, 0, 0, 0, 0,
+              0, 0, 0, 0, 0, 0,
+              0, 0, 0, 0, 0, 0,
+              0, 0, 0, 0, 0, 0.0685
+            ]
+          }
+        }
+      });
+      render();
+    }
+
+    function nowStamp() {
+      const ms = Date.now();
+      return {
+        sec: Math.floor(ms / 1000),
+        nanosec: (ms % 1000) * 1000000
+      };
+    }
+
+    function zeroStamp() {
+      return { sec: 0, nanosec: 0 };
+    }
+
+    function formatPose(pose) {
+      const yaw = quaternionYaw(pose.orientation) * 180 / Math.PI;
+      return `${pose.position.x.toFixed(2)}, ${pose.position.y.toFixed(2)}, ${yaw.toFixed(0)} deg`;
+    }
+
+    function zoomAt(factor, clientX, clientY) {
+      const rect = wrap.getBoundingClientRect();
+      const sx = clientX - rect.left;
+      const sy = clientY - rect.top;
+      const before = screenToMapPixel(clientX, clientY);
+      view.scale = Math.max(0.3, Math.min(80, view.scale * factor));
+      const cos = Math.cos(view.rotation);
+      const sin = Math.sin(view.rotation);
+      view.offsetX = sx - (before.x * view.scale * cos - before.y * view.scale * sin);
+      view.offsetY = sy - (before.x * view.scale * sin + before.y * view.scale * cos);
+      render();
+    }
+
+    homeBtn.addEventListener('click', () => window.location.assign('/'));
+    connectBtn.addEventListener('click', connect);
+    fitBtn.addEventListener('click', fitMap);
+    zoomInBtn.addEventListener('click', () => {
+      const rect = wrap.getBoundingClientRect();
+      zoomAt(1.25, rect.left + rect.width / 2, rect.top + rect.height / 2);
+    });
+    zoomOutBtn.addEventListener('click', () => {
+      const rect = wrap.getBoundingClientRect();
+      zoomAt(0.8, rect.left + rect.width / 2, rect.top + rect.height / 2);
+    });
+    rotLeftBtn.addEventListener('click', () => { view.rotation -= Math.PI / 2; fitMap(); });
+    rotRightBtn.addEventListener('click', () => { view.rotation += Math.PI / 2; fitMap(); });
+    initialPoseBtn.addEventListener('click', () => {
+      mode = mode === 'initial' ? 'pan' : 'initial';
+      initialPoseBtn.classList.toggle('active', mode === 'initial');
+      goalBtn.classList.remove('active');
+      wrap.classList.toggle('goal-mode', mode !== 'pan');
+    });
+    goalBtn.addEventListener('click', () => {
+      mode = mode === 'goal' ? 'pan' : 'goal';
+      goalBtn.classList.toggle('active', mode === 'goal');
+      initialPoseBtn.classList.remove('active');
+      wrap.classList.toggle('goal-mode', mode !== 'pan');
+    });
+    clearGoalBtn.addEventListener('click', () => {
+      goalPose = null;
+      pendingPose = null;
+      lastGoalEl.textContent = 'None';
+      render();
+    });
+
+    wrap.addEventListener('wheel', (event) => {
+      event.preventDefault();
+      zoomAt(event.deltaY < 0 ? 1.12 : 0.88, event.clientX, event.clientY);
+    }, { passive: false });
+
+    wrap.addEventListener('pointerdown', (event) => {
+      if (!map) return;
+      wrap.setPointerCapture(event.pointerId);
+      dragging = true;
+      dragStart = { x: event.clientX, y: event.clientY, offsetX: view.offsetX, offsetY: view.offsetY };
+
+      if (mode !== 'pan') {
+        const pixel = screenToMapPixel(event.clientX, event.clientY);
+        const position = pixelToWorld(pixel);
+        pendingPose = { position, yaw: 0 };
+        render();
+      }
+    });
+
+    wrap.addEventListener('pointermove', (event) => {
+      if (!dragging || !dragStart) return;
+
+      if (mode !== 'pan' && pendingPose) {
+        const startPixel = worldToPixel(pendingPose.position);
+        const nowPixel = screenToMapPixel(event.clientX, event.clientY);
+        const dx = nowPixel.x - startPixel.x;
+        const dy = nowPixel.y - startPixel.y;
+        pendingPose.yaw = Math.atan2(-dy, dx);
+        render();
+        return;
+      }
+
+      view.offsetX = dragStart.offsetX + event.clientX - dragStart.x;
+      view.offsetY = dragStart.offsetY + event.clientY - dragStart.y;
+      render();
+    });
+
+    wrap.addEventListener('pointerup', () => {
+      if (mode !== 'pan' && pendingPose) {
+        if (mode === 'initial') publishInitialPose(pendingPose.position, pendingPose.yaw);
+        if (mode === 'goal') publishGoal(pendingPose.position, pendingPose.yaw);
+        pendingPose = null;
+      }
+      dragging = false;
+      dragStart = null;
+    });
+
+    window.addEventListener('resize', () => {
+      if (map) fitMap();
+      render();
+    });
+
+    window.addEventListener('load', connect);
+  </script>
+</body>
+</html>

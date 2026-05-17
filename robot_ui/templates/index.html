@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robot AI Voice Interface</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div id="home-screen" class="screen active">
+        <div class="robot-container main-robot">
+            
+            <div class="eyes-container">
+                <div class="eye left">
+                    <div class="pupil"></div>
+                </div>
+                <div class="eye right">
+                    <div class="pupil"></div>
+                </div>
+            </div>
+
+            <svg class="mouth-svg" viewBox="0 0 200 100">
+                <path d="M 40 30 Q 100 80 160 30" stroke="#00aaff" stroke-width="12" fill="none" stroke-linecap="round" />
+            </svg>
+        </div>
+
+        <button id="start-voice-btn" class="nav-btn pulse-btn">
+            <span class="material-icons-round icon">mic</span>
+            Bắt đầu nói chuyện
+        </button>
+
+        <div class="dashboard-controls">
+            <button id="admin-btn" class="control-btn">
+                <span class="material-icons-round">admin_panel_settings</span>
+                Trang Quản Lý
+            </button>
+
+            <button id="med-btn" class="control-btn">
+                <span class="material-icons-round">medication</span>
+                Xác nhận thuốc
+            </button>
+
+            <button id="map-btn" class="control-btn">
+                <span class="material-icons-round">map</span>
+                Bản đồ
+            </button>
+        </div>
+        </div>
+
+
+    <div id="voice-screen" class="screen">
+        
+        <div class="screen-header">
+            <button id="back-btn" class="back-button">← Quay lại</button>
+            
+            <div class="assistant-info">
+                <div class="robot-container small-robot">
+                    <div class="eyes-container">
+                        <div class="eye left"><div class="pupil"></div></div>
+                        <div class="eye right"><div class="pupil"></div></div>
+                    </div>
+                     <svg class="mouth-svg" viewBox="0 0 200 100">
+                        <path d="M 40 30 Q 100 80 160 30" stroke="#00aaff" stroke-width="15" fill="none" stroke-linecap="round" />
+                    </svg>
+                </div>
+                <span>Trợ lý ảo AI</span>
+            </div>
+        </div>
+
+        <div class="voice-interface-container">
+            
+            <h2 id="voice-status">Nhấn vào micro để nói...</h2>
+
+            <div class="voice-visualizer">
+                <div class="wave w1"></div>
+                <div class="wave w2"></div>
+                <div class="wave w3"></div>
+
+                <button id="mic-toggle-btn" class="mic-button">
+                    <span class="material-icons-round md-48">mic</span>
+                </button>
+            </div>
+
+            <p id="transcript-text">...</p>
+
+        </div>
+    </div>
+
+    <div id="password-modal" class="modal">
+        <div class="modal-content">
+            <h3>🔒 Yêu cầu bảo mật</h3>
+            <p>Vui lòng nhập mật khẩu quản trị viên:</p>
+            <input type="password" id="admin-password" placeholder="Nhập mật khẩu...">
+            <div class="modal-actions">
+                <button id="cancel-pass-btn" class="btn-gray">Hủy</button>
+                <button id="confirm-pass-btn" class="btn-blue">Đăng nhập</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="med-modal" class="modal">
+        <div class="modal-content">
+            <h3>💊 Xác nhận uống thuốc</h3>
+            <p>Bệnh nhân đã uống thuốc chưa?</p>
+            
+            <div class="med-actions">
+                <button id="med-no-btn" class="circle-btn red">
+                    <span class="material-icons-round">close</span>
+                </button>
+                
+                <button id="med-yes-btn" class="circle-btn green">
+                    <span class="material-icons-round">check</span>
+                </button>
+            </div>
+            
+            <button id="close-med-btn" class="btn-text">Đóng lại</button>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
