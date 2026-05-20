@@ -105,6 +105,28 @@ python3 -m pip install -r requirements.txt
 
 If `requirements.txt` is not present, install the app dependencies used by your current UI server manually.
 
+## Configuration & Environment Setup
+
+The Flask AI assistant server requires a Google Gemini API Key to handle Speech-to-Text (STT) and assistant response generation. Follow these steps to configure the environment:
+
+1. Copy the `.env.example` file in `robot_ui` to a new file named `.env`:
+   ```bash
+   cd ~/mopero/robot_ui
+   cp .env.example .env
+   ```
+
+2. Open the `.env` file and set your actual Gemini API key:
+   ```env
+   API_KEY=AIzaSyYourActualKeyHere
+   ```
+   > [!IMPORTANT]
+   > You can get a free Gemini API key from [Google AI Studio](https://aistudio.google.com/).
+   > **Never commit your `.env` file containing the actual key!** The `.gitignore` is configured to isolate `.env` and prevent it from being pushed to GitHub.
+
+3. Optional configuration parameters in `robot_ui/.env`:
+   - `AI_MODEL`: Set a specific Gemini model (defaults to `gemini-2.5-flash`).
+   - `AI_PORT`: Set the port on which the AI backend server runs (defaults to `5001`).
+
 ## Build ROS2 Workspace
 
 Build from the new repository path:
